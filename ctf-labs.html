@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CTF Labs — Muhammad Essa</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="ctf-labs.css">
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="brand">
+    <span class="bracket">[</span><span class="name">M.E</span><span class="bracket">]</span>
+  </a>
+  <button class="hamburger" id="hamburger" aria-label="Toggle navigation">&#9776;</button>
+  <div class="nav-right">
+    <ul id="nav-menu">
+      <li><a href="index.html#about">About</a></li>
+      <li><a href="index.html#projects">Projects</a></li>
+      <li><a href="index.html#contact">Contact</a></li>
+    </ul>
+    <a href="index.html" class="back-link">← Portfolio</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <p class="tag">CTF Labs</p>
+  <h1>Writeups &amp;<br><span class="green">Challenge Breakdowns</span></h1>
+  <p>Detailed solutions, techniques, and lessons learned from CTF competitions. New writeups are posted after each event.</p>
+</div>
+
+<!-- TOOLBAR -->
+<div class="wrap">
+  <div class="toolbar">
+    <div class="filter-row" id="filter-row">
+      <button class="filter-btn active" data-cat="all">All</button>
+      <button class="filter-btn" data-cat="web">Web</button>
+      <button class="filter-btn" data-cat="crypto">Crypto</button>
+      <button class="filter-btn" data-cat="binary">Binary</button>
+      <button class="filter-btn" data-cat="forensics">Forensics</button>
+      <button class="filter-btn" data-cat="re">Rev Eng</button>
+      <button class="filter-btn" data-cat="network">Network</button>
+      <button class="filter-btn" data-cat="osint">OSINT</button>
+      <button class="filter-btn" data-cat="misc">Misc</button>
+    </div>
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input id="search" type="text" placeholder="Search writeups…">
+    </div>
+  </div>
+
+  <div id="ctf-grid"></div>
+</div>
+
+<div class="overlay" id="read-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-meta" id="modal-meta"></div>
+        <div class="modal-title" id="modal-title"></div>
+        <div class="modal-comp" id="modal-comp"></div>
+      </div>
+      <button class="close-btn" id="close-read">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="writeup-content" id="writeup-body"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let writeups = [];
+
+const catLabels  = { web:'Web', crypto:'Crypto', binary:'Binary', forensics:'Forensics', re:'Rev Eng', network:'Network', osint:'OSINT', misc:'Misc' };
+const diffLabels = { easy:'Easy', medium:'Medium', hard:'Hard' };
+
+function escape(str) {
+  return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function catBadge(cat) {
+  return `<span class="cat-badge cb-${cat}">${catLabels[cat] || cat}</span>`;
+}
+
+function diffBadge(diff) {
+  return `<span class="diff diff-${diff}">${diffLabels[diff] || diff}</span>`;
+}
+
+function formatDate(d) {
+  if (!d) return '';
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+let activeCategory = 'all';
+let searchQuery = '';
+
+function getFiltered() {
+  return writeups.filter(w => {
+    const matchesCat = activeCategory === 'all' || w.cat === activeCategory;
+    const q = searchQuery.toLowerCase();
+    // checking all text fields so you can search "ncae" and find stuff by competition name
+    const matchesSearch = !q || [w.title, w.comp, w.desc, w.cat].some(f => (f || '').toLowerCase().includes(q));
+    return matchesCat && matchesSearch;
+  });
+}
+
+function renderGrid() {
+  const grid = document.getElementById('ctf-grid');
+  const list = getFiltered();
+  grid.innerHTML = '';
+
+  if (!list.length) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-badge">[ 0 writeups ]</div>
+        <h3>Coming Soon</h3>
+        <p>CTF writeups and challenge breakdowns will appear here after each competition. Check back after the next event.</p>
+        <div class="upcoming-events">
+          <span>HTB Binary Badlands</span>
+          <span>NCAE Cyber Games</span>
+          <span>Dakota Con CTF</span>
+          <span>CyberBay CTF</span>
+          <span>DSU vs. WGU CTF</span>
+        </div>
+      </div>`;
+    return;
+  }
+
+  list.forEach(w => {
+    const wrapper = document.createElement('div');
+    wrapper.className = `cat-${w.cat}`;
+    wrapper.innerHTML = `
+      <div class="ctf-card">
+        <div class="card-body">
+          <div class="card-top">${catBadge(w.cat)}${diffBadge(w.diff)}</div>
+          <div class="card-title">${escape(w.title)}</div>
+          <div class="card-comp">${escape(w.comp)}</div>
+          <div class="card-desc">${escape(w.desc)}</div>
+          <div class="card-footer">
+            <div class="card-meta">
+              <span class="card-pts">${w.pts}pts</span>
+              <span>${formatDate(w.date)}</span>
+            </div>
+            <button class="read-btn" data-id="${w.id}">Read Writeup →</button>
+          </div>
+        </div>
+      </div>`;
+    grid.appendChild(wrapper);
+  });
+
+  grid.querySelectorAll('.read-btn').forEach(btn => {
+    btn.addEventListener('click', () => openWriteup(btn.dataset.id));
+  });
+}
+
+document.getElementById('filter-row').addEventListener('click', e => {
+  const btn = e.target.closest('.filter-btn');
+  if (!btn) return;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeCategory = btn.dataset.cat;
+  renderGrid();
+});
+
+document.getElementById('search').addEventListener('input', e => {
+  searchQuery = e.target.value;
+  renderGrid();
+});
+
+const readOverlay = document.getElementById('read-overlay');
+
+document.getElementById('close-read').addEventListener('click', closeWriteup);
+readOverlay.addEventListener('click', e => { if (e.target === readOverlay) closeWriteup(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeWriteup(); });
+
+function openWriteup(id) {
+  const w = writeups.find(x => String(x.id) === id);
+  if (!w) return;
+
+  document.getElementById('modal-meta').innerHTML = catBadge(w.cat) + diffBadge(w.diff) +
+    `<span style="font-family:'JetBrains Mono',monospace;font-size:.71rem;color:#415868">${w.pts}pts &nbsp;·&nbsp; ${formatDate(w.date)}</span>`;
+  document.getElementById('modal-title').textContent = w.title;
+  document.getElementById('modal-comp').textContent = w.comp;
+
+  const body = document.getElementById('writeup-body');
+  body.innerHTML = parseWriteup(w.writeup || 'No writeup content yet.');
+  if (w.flag) {
+    body.innerHTML += `<div class="flag-box"><span class="flag-label">Flag</span><span class="flag-value">${escape(w.flag)}</span></div>`;
+  }
+
+  readOverlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('close-read').focus();
+}
+
+function closeWriteup() {
+  readOverlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function parseWriteup(text) {
+  let html = '';
+  let inCodeBlock = false;
+
+  text.split('\n').forEach(line => {
+    if (line.startsWith('```')) {
+      html += inCodeBlock ? '</code></pre>' : '<pre><code>';
+      inCodeBlock = !inCodeBlock;
+      return;
+    }
+    if (inCodeBlock) { html += escape(line) + '\n'; return; }
+
+    if (line.startsWith('### ')) {
+      html += `<h3>${escape(line.slice(4))}</h3>`;
+    } else if (line.trim() === '') {
+      html += '<br>';
+    } else {
+      html += `<p>${escape(line).replace(/`([^`]+)`/g, '<code>$1</code>')}</p>`;
+    }
+  });
+
+  if (inCodeBlock) html += '</code></pre>';
+
+  return html;
+}
+
+const navMenu = document.getElementById('nav-menu');
+
+document.getElementById('hamburger').addEventListener('click', () => {
+  navMenu.classList.toggle('open');
+});
+
+navMenu.querySelectorAll('a').forEach(a => {
+  a.addEventListener('click', () => navMenu.classList.remove('open'));
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('nav')) navMenu.classList.remove('open');
+});
+
+fetch('/api/writeups')
+  .then(r => r.json())
+  .then(data => { writeups = data; renderGrid(); })
+  .catch(() => renderGrid());
+</script>
+</body>
+</html>
