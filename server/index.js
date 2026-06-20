@@ -47,4 +47,9 @@ app.use(rateLimit(120));
 app.use(express.static(path.join(__dirname, '..')));
 app.use('/api/writeups', rateLimit(20), writeupsRouter);
 
+app.use((req, res) => {
+  if (req.path.startsWith('/api/')) return res.status(404).json({ error: 'not found' });
+  res.status(404).send('404 — page not found');
+});
+
 app.listen(PORT, () => console.log(`http://localhost:${PORT}`));

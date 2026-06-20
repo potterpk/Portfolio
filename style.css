@@ -34,9 +34,7 @@ body::before {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background:
-    radial-gradient(ellipse 65% 55% at 0% 0%,   rgba(0, 255, 136, 0.055), transparent 55%),
-    radial-gradient(ellipse 50% 45% at 100% 95%, rgba(34, 211, 238, 0.035), transparent 55%);
+  background: radial-gradient(ellipse 60% 50% at 0% 0%, rgba(0, 255, 136, 0.05), transparent 55%);
 }
 
 ::-webkit-scrollbar       { width: 4px; }
@@ -304,7 +302,7 @@ h1 {
 }
 
 h1 .first { display: block; color: var(--text); }
-h1 .last  { display: block; color: var(--green); text-shadow: 0 0 80px rgba(0, 255, 136, 0.16); }
+h1 .last  { display: block; color: var(--green); }
 
 .hero-role {
   font-family: 'JetBrains Mono', monospace;
@@ -409,7 +407,6 @@ h2 {
   color: var(--green);
   line-height: 1;
   margin-bottom: 0.3rem;
-  text-shadow: 0 0 30px rgba(0, 255, 136, 0.22);
 }
 .stat-label { font-size: 0.73rem; color: var(--faint); text-transform: uppercase; letter-spacing: 0.1em; }
 
@@ -509,7 +506,7 @@ h2 {
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  transition: all 0.25s;
+  transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
 }
 
 .project-card::after {
@@ -517,19 +514,9 @@ h2 {
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.18), rgba(34, 211, 238, 0.12), transparent);
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.18), transparent);
 }
 
-.project-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(ellipse at top left, rgba(0, 255, 136, 0.05), transparent 55%);
-  opacity: 0;
-  transition: opacity 0.25s;
-}
-.project-card:hover::before { opacity: 1; }
 .project-card:hover {
   border-color: rgba(0, 255, 136, 0.16);
   transform: translateY(-3px);
@@ -625,7 +612,6 @@ h2 {
   font-weight: 700;
   line-height: 1;
   color: var(--green);
-  text-shadow: 0 0 50px rgba(0, 255, 136, 0.22);
   margin-bottom: 0.25rem;
 }
 .placement-denom { font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--faint); margin-bottom: 0.6rem; }
@@ -744,7 +730,6 @@ h2 {
   font-weight: 700;
   color: var(--green);
   flex-shrink: 0;
-  text-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
 }
 
 .org-name { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 600; color: var(--text); margin-bottom: 0.25rem; }
