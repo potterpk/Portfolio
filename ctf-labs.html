@@ -88,6 +88,7 @@
 
 <script>
 let writeups = [];
+let fetchFailed = false;
 
 const catLabels  = { web:'Web', crypto:'Crypto', binary:'Binary', forensics:'Forensics', re:'Rev Eng', network:'Network', osint:'OSINT', misc:'Misc' };
 const diffLabels = { easy:'Easy', medium:'Medium', hard:'Hard' };
@@ -127,19 +128,28 @@ function renderGrid() {
   grid.innerHTML = '';
 
   if (!list.length) {
-    grid.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-badge">[ 0 writeups ]</div>
-        <h3>Coming Soon</h3>
-        <p>CTF writeups and challenge breakdowns will appear here after each competition. Check back after the next event.</p>
-        <div class="upcoming-events">
-          <span>HTB Binary Badlands</span>
-          <span>NCAE Cyber Games</span>
-          <span>Dakota Con CTF</span>
-          <span>CyberBay CTF</span>
-          <span>DSU vs. WGU CTF</span>
-        </div>
-      </div>`;
+    if (fetchFailed) {
+      grid.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-badge">[ error ]</div>
+          <h3>Couldn't connect</h3>
+          <p>Server isn't responding. Start it with <code>node server/index.js</code> and refresh.</p>
+        </div>`;
+    } else {
+      grid.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-badge">[ 0 writeups ]</div>
+          <h3>Coming Soon</h3>
+          <p>CTF writeups and challenge breakdowns will appear here after each competition. Check back after the next event.</p>
+          <div class="upcoming-events">
+            <span>HTB Binary Badlands</span>
+            <span>NCAE Cyber Games</span>
+            <span>Dakota Con CTF</span>
+            <span>CyberBay CTF</span>
+            <span>DSU vs. WGU CTF</span>
+          </div>
+        </div>`;
+    }
     return;
   }
 
@@ -235,7 +245,8 @@ function parseWriteup(text) {
       const safe = escape(line)
         .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
         .replace(/\*(.+?)\*/g,     '<em>$1</em>')
-        .replace(/`([^`]+)`/g,     '<code>$1</code>');
+        .replace(/`([^`]+)`/g,     '<code>$1</code>')
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
       html += `<p>${safe}</p>`;
     }
   }
@@ -268,7 +279,7 @@ document.getElementById('ctf-grid').innerHTML = '<p class="load-msg">loading wri
 fetch('/api/writeups')
   .then(r => r.json())
   .then(data => { writeups = data; renderGrid(); })
-  .catch(() => renderGrid());
+  .catch(() => { fetchFailed = true; renderGrid(); });
 </script>
 </body>
 </html>
