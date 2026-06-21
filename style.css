@@ -648,27 +648,28 @@ h2 {
 .ctf-cta       { text-align: center; }
 
 /* skills */
-.skills-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
-  gap: 1.2rem;
+.skills-flat {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
 }
 
-.skill-group {
-  background: var(--surface);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 10px;
-  padding: 1.4rem;
+.skills-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
 }
 
-.skill-group-title {
+.skills-label {
   font-size: 0.72rem;
   color: var(--accent);
-  letter-spacing: 0.18em;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  margin-bottom: 0.9rem;
   font-weight: 600;
   opacity: 0.8;
+  min-width: 80px;
+  padding-top: 0.3rem;
+  flex-shrink: 0;
 }
 
 .skill-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
