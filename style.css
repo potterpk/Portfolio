@@ -835,6 +835,8 @@ footer .highlight { color: var(--accent); }
   .term-card     { display: none; }
   .about-grid    { grid-template-columns: 1fr; }
   .podium        { grid-template-columns: 1fr 1fr; }
+  .skills-row    { flex-direction: column; gap: 0.5rem; }
+  .skills-label  { min-width: unset; padding-top: 0; }
 
   nav { padding: 0 1.4rem; }
 
