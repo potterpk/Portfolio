@@ -3,7 +3,6 @@ const path = require('path');
 
 const FILE = path.join(__dirname, 'writeups.json');
 
-// simple async write queue so concurrent POSTs don't clobber each other
 let busy   = false;
 let queued = null;
 

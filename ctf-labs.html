@@ -21,6 +21,7 @@
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="ctf-labs.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='5' fill='%230d0d0b'/><text x='16' y='21' font-family='monospace' font-size='13' font-weight='bold' fill='%23c9984a' text-anchor='middle'>ME</text></svg>">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
 
@@ -93,10 +94,6 @@ let fetchFailed = false;
 const catLabels  = { web:'Web', crypto:'Crypto', binary:'Binary', forensics:'Forensics', re:'Rev Eng', network:'Network', osint:'OSINT', misc:'Misc' };
 const diffLabels = { easy:'Easy', medium:'Medium', hard:'Hard' };
 
-function escape(str) {
-  return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
 function catBadge(cat) {
   return `<span class="cat-badge cb-${cat}">${catLabels[cat] || cat}</span>`;
 }
@@ -151,9 +148,9 @@ function renderGrid() {
       <div class="ctf-card">
         <div class="card-body">
           <div class="card-top">${catBadge(w.cat)}${diffBadge(w.diff)}</div>
-          <div class="card-title">${escape(w.title)}</div>
-          <div class="card-comp">${escape(w.comp)}</div>
-          <div class="card-desc">${escape(w.desc)}</div>
+          <div class="card-title"></div>
+          <div class="card-comp"></div>
+          <div class="card-desc"></div>
           <div class="card-footer">
             <div class="card-meta">
               <span class="card-pts">${w.pts}pts</span>
@@ -163,6 +160,9 @@ function renderGrid() {
           </div>
         </div>
       </div>`;
+    wrapper.querySelector('.card-title').textContent = w.title;
+    wrapper.querySelector('.card-comp').textContent  = w.comp;
+    wrapper.querySelector('.card-desc').textContent  = w.desc;
     grid.appendChild(wrapper);
   });
 
@@ -201,9 +201,13 @@ function openWriteup(id) {
   document.getElementById('modal-comp').textContent = w.comp;
 
   const body = document.getElementById('writeup-body');
-  body.innerHTML = parseWriteup(w.writeup || 'No writeup content yet.');
+  body.innerHTML = marked.parse(w.writeup || 'No writeup content yet.');
   if (w.flag) {
-    body.innerHTML += `<div class="flag-box"><span class="flag-label">Flag</span><span class="flag-value">${escape(w.flag)}</span></div>`;
+    const flagBox = document.createElement('div');
+    flagBox.className = 'flag-box';
+    flagBox.innerHTML = '<span class="flag-label">Flag</span><span class="flag-value"></span>';
+    flagBox.querySelector('.flag-value').textContent = w.flag;
+    body.appendChild(flagBox);
   }
 
   readOverlay.classList.add('open');
@@ -216,35 +220,6 @@ function closeWriteup() {
   document.body.style.overflow = '';
 }
 
-function parseWriteup(text) {
-  let html = '';
-  let inCode = false;
-
-  for (const line of text.split('\n')) {
-    if (line.startsWith('```')) {
-      html += inCode ? '</code></pre>' : '<pre><code>';
-      inCode = !inCode;
-      continue;
-    }
-    if (inCode) { html += escape(line) + '\n'; continue; }
-
-    if      (line.startsWith('### ')) html += `<h3>${escape(line.slice(4))}</h3>`;
-    else if (line.startsWith('## '))  html += `<h2>${escape(line.slice(3))}</h2>`;
-    else if (line.startsWith('# '))   html += `<h1>${escape(line.slice(2))}</h1>`;
-    else if (!line.trim())            html += '<br>';
-    else {
-      const safe = escape(line)
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.+?)\*/g,     '<em>$1</em>')
-        .replace(/`([^`]+)`/g,     '<code>$1</code>')
-        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
-      html += `<p>${safe}</p>`;
-    }
-  }
-
-  if (inCode) html += '</code></pre>';
-  return html;
-}
 
 const navMenu = document.getElementById('nav-menu');
 
